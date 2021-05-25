@@ -1,27 +1,16 @@
-import argparse
 import csv
 
-from server import ServerCaller
 from time import sleep
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Generate prestige overview for association members')
-    parser.add_argument('session_id', help='The current PHPSESSID')
-    parser.add_argument('--server', default='s1.railnation.de', help='The server where the session is active')
-    args = parser.parse_args()
-
-    # let's go
-    api = ServerCaller(args.server, args.session_id)
-
+def association_prestige(api):
     # association analysis
-    assoc_info = api.call('CorporationInterface', 'getOtherMemberBuildings',
-                          ["00000000-0000-0000-0000-000000000000"])
+    assoc_info = api.call('CorporationInterface', 'getOtherMemberBuildings', ["00000000-0000-0000-0000-000000000000"])
     print(f"Info for {len(assoc_info['Body'])} members")
 
     # fetch all prestige details
     prestiges = {}
-    for user_id, member in tqdm(assoc_info['Body'].items()):
+    for user_id, member in assoc_info['Body'].items():
         prestiges[user_id] = {}
         prestiges[user_id]['overview'] = api.call('BudgetInterface', 'getPrestigeHistoryDetails',
                                                   [user_id, 9])['Body']['balance']
