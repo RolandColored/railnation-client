@@ -1,10 +1,9 @@
-import traceback
-
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot, QThread
-from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QWidget, QDialog, QDialogButtonBox, \
-    QVBoxLayout, QLabel, QFileDialog
+from PyQt5.QtCore import QThread, QObject
+from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QWidget, QFileDialog
 
+from src.main.python.error_dialog import ExceptionDialog
+from src.main.python.loads import LoadsWorker
 from src.main.python.prestige import PrestigeWorker
 from src.main.python.server import ServerCaller
 
@@ -17,6 +16,7 @@ class App(Form, QWidget):
     def setupUi(self, window):
         super().setupUi(window)
         self.btn_prestige.clicked.connect(self.clicked_prestige)
+        self.btn_loads.clicked.connect(self.clicked_loads)
 
         server_number, _ = QInputDialog.getInt(self, "Server Number", "Server Number:")
         session_id, _ = QInputDialog.getText(self, "PHPSESSID", "PHPSESSID:", QLineEdit.Normal)
@@ -26,54 +26,42 @@ class App(Form, QWidget):
         self.progressBar.setValue(int(i / total * 100))
 
     def finished_process(self):
-        print('Cleanup')
         self.report_progress(0, 1)
-        self.btn_prestige.setEnabled(True)
-        self.btn_loads.setEnabled(True)
-        self.btn_storage.setEnabled(True)
+        self._set_enabled_state_all_buttons(True)
+
+    def handle_exception(self, error: str):
+        dlg = ExceptionDialog(error)
+        dlg.exec()
 
     def clicked_prestige(self):
-        self.btn_prestige.setEnabled(False)
-        self.btn_loads.setEnabled(False)
-        self.btn_storage.setEnabled(False)
+        self._set_enabled_state_all_buttons(False)
         filename = QFileDialog.getSaveFileName(self, 'Datei speichern', "prestige.csv")
+        self._process_in_thread(PrestigeWorker(self.api, filename[0]))
 
-        try:
-            self.thread = QThread()
-            self.worker = PrestigeWorker(self.api, filename[0])
-            self.worker.moveToThread(self.thread)
-            # Step 5: Connect signals and slots
-            self.thread.started.connect(self.worker.run)
-            self.worker.finished.connect(self.thread.quit)
-            self.worker.finished.connect(self.worker.deleteLater)
-            self.thread.finished.connect(self.thread.deleteLater)
-            self.worker.progress.connect(self.report_progress)
-            self.thread.finished.connect(self.finished_process)
-            # Step 6: Start the thread
-            self.thread.start()
-        except:
-            dlg = ExceptionDialog()
-            dlg.exec()
+    def clicked_loads(self):
+        self._set_enabled_state_all_buttons(False)
+        self._process_in_thread(LoadsWorker(self.api))
 
+    def _set_enabled_state_all_buttons(self, state: bool):
+        buttons = [self.btn_prestige, self.btn_loads, self.btn_storage]
+        for button in buttons:
+            button.setEnabled(state)
 
-class ExceptionDialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def _process_in_thread(self, worker_instance: QObject):
+        self.thread = QThread()
+        self.worker = worker_instance
+        self.worker.moveToThread(self.thread)
+        # Connect signals and slots
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.progress.connect(self.report_progress)
+        self.worker.error.connect(self.handle_exception)
 
-        self.setWindowTitle('Unhandled Exception')
-
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
-        self.buttonBox.clicked.connect(self.close_application)
-
-        self.layout = QVBoxLayout()
-        message = QLabel(traceback.format_exc())
-        self.layout.addWidget(message)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
-
-    @pyqtSlot()
-    def close_application(self):
-        exit(-1)
+        self.thread.started.connect(self.worker.run)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.finished_process)
+        # Start the thread
+        self.thread.start()
 
 
 if __name__ == '__main__':

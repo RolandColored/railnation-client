@@ -1,20 +1,15 @@
 import csv
-
 from time import sleep
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from src.main.python.worker import AbstractWorker
 
 
-class PrestigeWorker(QObject):
-    finished = pyqtSignal()
-    progress = pyqtSignal(int, int)
-
+class PrestigeWorker(AbstractWorker):
     def __init__(self, api, filename):
-        super().__init__()
-        self.api = api
+        super().__init__(api)
         self.filename = filename
 
-    def run(self):
+    def run_wrapped(self):
         # association analysis
         assoc_info = self.api.call('CorporationInterface', 'getOtherMemberBuildings',
                                    ["00000000-0000-0000-0000-000000000000"])
