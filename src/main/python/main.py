@@ -18,8 +18,8 @@ class App(Form, QWidget):
         self.btn_prestige.clicked.connect(self.clicked_prestige)
         self.btn_loads.clicked.connect(self.clicked_loads)
 
-        server_number, _ = QInputDialog.getInt(self, "Server Number", "Server Number:")
-        session_id, _ = QInputDialog.getText(self, "PHPSESSID", "PHPSESSID:", QLineEdit.Normal)
+        server_number, _ = QInputDialog.getInt(self, "Server Nummer", "s")
+        session_id, _ = QInputDialog.getText(self, "Session ID", "PHPSESSID:", QLineEdit.Normal)
         self.api = ServerCaller(f's{server_number}.railnation.de', session_id)
 
     def report_progress(self, i, total):
@@ -35,12 +35,13 @@ class App(Form, QWidget):
 
     def clicked_prestige(self):
         self._set_enabled_state_all_buttons(False)
-        filename = QFileDialog.getSaveFileName(self, 'Datei speichern', "prestige.csv")
+        filename = QFileDialog.getSaveFileName(self, 'Datei speichern', 'prestige.csv')
         self._process_in_thread(PrestigeWorker(self.api, filename[0]))
 
     def clicked_loads(self):
         self._set_enabled_state_all_buttons(False)
-        self._process_in_thread(LoadsWorker(self.api))
+        filename = QFileDialog.getOpenFileName(self, 'token.pickle')
+        self._process_in_thread(LoadsWorker(self.api, filename[0]))
 
     def _set_enabled_state_all_buttons(self, state: bool):
         buttons = [self.btn_prestige, self.btn_loads, self.btn_storage]

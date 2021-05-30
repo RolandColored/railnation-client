@@ -4,25 +4,17 @@ from time import sleep
 
 from googleapiclient.discovery import build
 
+from src.main.python.config import *
 from src.main.python.worker import AbstractWorker
 
 
 class LoadsWorker(AbstractWorker):
-    def __init__(self, api):
+    def __init__(self, api, token_file):
         super().__init__(api)
+        self.token_file = token_file
 
     def run_wrapped(self):
-        SPREADSHEET_ID = '1PUkEhDxq59BVvPofj8zucO4NtglX27Wz4m2fiChS_5k'
-        SHEET_NAME = 'Endspiel Maindaten'
-        FIRST_DATA_ROW = 12
-        DONE_COLUMN = 'D'
-        IDS_COLUMN = 'Y'
-        LEVEL_COLUMN = 'G'
-        LOADS_COLUMN = 'I'
-        HARBOUR_ID = '01cb7fc7-4321-4762-ae3c-06cb64a896b5'
-        WAREHOUSE_ID = '10f808a0-8aba-4e91-9d9f-fe1a3edc1b57'
-
-        with open('token.pickle', 'rb') as token:
+        with open(self.token_file, 'rb') as token:
             creds = pickle.load(token)
         service = build('sheets', 'v4', credentials=creds)
         sheet = service.spreadsheets()
@@ -30,18 +22,21 @@ class LoadsWorker(AbstractWorker):
         # get factory IDs
         result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=f'{SHEET_NAME}!{DONE_COLUMN}{FIRST_DATA_ROW}:{IDS_COLUMN}').execute()
         factories = result.get('values', [])
-        print(factories)
 
         for i, factory in enumerate(factories):
-            factory_id = factory[-1]
-            done = factory[0]
+            if len(factory) < 10:
+                continue  # invalid row
 
-            if done == 'Ja':
+            factory_id = factory[-1]
+            good_done = factory[0]
+            factory_name = factory[2]
+
+            if good_done == 'Ja':
                 continue
 
-            if factory_id == WAREHOUSE_ID:
+            if 'Lager' in factory_name:
                 factory_details = self.api.call('WarehouseInterface', 'getOverview', [factory_id], )['Body']
-            elif factory_id == HARBOUR_ID:
+            elif 'Hafen' in factory_name:
                 factory_details = self.api.call('HarborInterface', 'getOverview', [factory_id], )['Body']
             else:
                 factory_details = self.api.call('LocationInterface', 'getFactoryDetails', [factory_id], )['Body']
@@ -59,4 +54,6 @@ class LoadsWorker(AbstractWorker):
                 print(i, factory_id)
                 pprint(factory_details)
 
+            self.progress.emit(i, len(factories))
             sleep(1)
+        self.finished.emit()
