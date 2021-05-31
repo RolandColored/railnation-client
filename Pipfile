@@ -5,8 +5,11 @@ name = "pypi"
 
 [packages]
 google-api-python-client = "*"
+pyqt5 = "*"
+requests = "*"
+fbs = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.6"

@@ -18,7 +18,7 @@ class App(Form, QWidget):
         self.btn_prestige.clicked.connect(self.clicked_prestige)
         self.btn_loads.clicked.connect(self.clicked_loads)
 
-        server_number, _ = QInputDialog.getInt(self, "Server Nummer", "s")
+        server_number, _ = QInputDialog.getInt(self, "Server Nummer", "s???")
         session_id, _ = QInputDialog.getText(self, "Session ID", "PHPSESSID:", QLineEdit.Normal)
         self.api = ServerCaller(f's{server_number}.railnation.de', session_id)
 
