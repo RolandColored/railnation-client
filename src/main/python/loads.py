@@ -16,7 +16,8 @@ class LoadsWorker(AbstractWorker):
     def run_wrapped(self):
         with open(self.token_file, 'rb') as token:
             creds = pickle.load(token)
-        service = build('sheets', 'v4', credentials=creds)
+        service = build('sheets', 'v4', credentials=creds,
+                        discoveryServiceUrl='https://sheets.googleapis.com/$discovery/rest?version=v4')
         sheet = service.spreadsheets()
 
         # get factory IDs
