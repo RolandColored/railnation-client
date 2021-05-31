@@ -1,8 +1,8 @@
-import sys
+import pickle
 import traceback
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel
+from PyQt5.QtCore import QObject, pyqtSignal
+from googleapiclient.discovery import build
 
 
 class AbstractWorker(QObject):
@@ -23,3 +23,9 @@ class AbstractWorker(QObject):
     def run_wrapped(self):
         raise NotImplementedError()
 
+    def get_gsheet(self, token_file):
+        with open(self.token_file, 'rb') as token:
+            creds = pickle.load(token)
+        service = build('sheets', 'v4', credentials=creds,
+                        discoveryServiceUrl='https://sheets.googleapis.com/$discovery/rest?version=v4')
+        return service.spreadsheets()

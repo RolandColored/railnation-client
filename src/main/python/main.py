@@ -9,6 +9,7 @@ from error_dialog import ExceptionDialog
 from loads import LoadsWorker
 from prestige import PrestigeWorker
 from server import ServerCaller
+from storage import StorageWorker
 
 
 class App(QDialog):
@@ -20,6 +21,7 @@ class App(QDialog):
 
         self.btn_prestige.clicked.connect(self.clicked_prestige)
         self.btn_loads.clicked.connect(self.clicked_loads)
+        self.btn_storage.clicked.connect(self.clicked_storage)
 
         server_number, _ = QInputDialog.getInt(self, "Server Nummer", "s???")
         session_id, _ = QInputDialog.getText(self, "Session ID", "PHPSESSID:", QLineEdit.Normal)
@@ -45,6 +47,11 @@ class App(QDialog):
         self._set_enabled_state_all_buttons(False)
         filename = QFileDialog.getOpenFileName(self, 'token.pickle')
         self._process_in_thread(LoadsWorker(self.api, filename[0]))
+
+    def clicked_storage(self):
+        self._set_enabled_state_all_buttons(False)
+        filename = QFileDialog.getOpenFileName(self, 'token.pickle')
+        self._process_in_thread(StorageWorker(self.api, filename[0]))
 
     def _set_enabled_state_all_buttons(self, state: bool):
         buttons = [self.btn_prestige, self.btn_loads, self.btn_storage]

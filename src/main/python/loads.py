@@ -1,8 +1,4 @@
-import pickle
-from pprint import pprint
 from time import sleep
-
-from googleapiclient.discovery import build
 
 from config import *
 from worker import AbstractWorker
@@ -14,11 +10,7 @@ class LoadsWorker(AbstractWorker):
         self.token_file = token_file
 
     def run_wrapped(self):
-        with open(self.token_file, 'rb') as token:
-            creds = pickle.load(token)
-        service = build('sheets', 'v4', credentials=creds,
-                        discoveryServiceUrl='https://sheets.googleapis.com/$discovery/rest?version=v4')
-        sheet = service.spreadsheets()
+        sheet = self.get_gsheet(self.token_file)
 
         # get factory IDs
         result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=f'{SHEET_NAME}!{DONE_COLUMN}{FIRST_DATA_ROW}:{IDS_COLUMN}').execute()
@@ -53,7 +45,7 @@ class LoadsWorker(AbstractWorker):
             except KeyError as err:
                 print(err)
                 print(i, factory_id)
-                pprint(factory_details)
+                print(factory_details)
 
             self.progress.emit(i, len(factories))
             sleep(1)
