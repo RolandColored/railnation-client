@@ -1,7 +1,7 @@
 import csv
 from time import sleep
 
-from src.main.python.worker import AbstractWorker
+from worker import AbstractWorker
 
 
 class PrestigeWorker(AbstractWorker):

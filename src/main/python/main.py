@@ -1,20 +1,23 @@
+import sys
+
 from PyQt5 import uic
 from PyQt5.QtCore import QThread, QObject
-from PyQt5.QtWidgets import QApplication, QInputDialog, QLineEdit, QWidget, QFileDialog
+from PyQt5.QtWidgets import QInputDialog, QLineEdit, QFileDialog, QDialog
+from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
-from src.main.python.error_dialog import ExceptionDialog
-from src.main.python.loads import LoadsWorker
-from src.main.python.prestige import PrestigeWorker
-from src.main.python.server import ServerCaller
-
-Form, Window = uic.loadUiType("../dialog.ui")
+from error_dialog import ExceptionDialog
+from loads import LoadsWorker
+from prestige import PrestigeWorker
+from server import ServerCaller
 
 
-class App(Form, QWidget):
+class App(QDialog):
     api = None
 
-    def setupUi(self, window):
-        super().setupUi(window)
+    def __init__(self, ui, parent=None):
+        super().__init__(parent)
+        uic.loadUi(ui, self)
+
         self.btn_prestige.clicked.connect(self.clicked_prestige)
         self.btn_loads.clicked.connect(self.clicked_loads)
 
@@ -66,9 +69,9 @@ class App(Form, QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication([])
-    window = Window()
-    form = App()
-    form.setupUi(window)
+    appctxt = ApplicationContext()  # 1. Instantiate ApplicationContext
+    dialog = appctxt.get_resource('dialog.ui')
+    window = App(dialog)
     window.show()
-    app.exec()
+    exit_code = appctxt.app.exec()  # 2. Invoke appctxt.app.exec()
+    sys.exit(exit_code)

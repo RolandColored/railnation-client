@@ -1,3 +1,5 @@
+import sys
+
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QLabel
 
@@ -19,4 +21,4 @@ class ExceptionDialog(QDialog):
 
     @pyqtSlot()
     def close_application(self):
-        exit(-1)
+        sys.exit(-1)

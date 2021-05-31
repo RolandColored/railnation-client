@@ -4,8 +4,8 @@ from time import sleep
 
 from googleapiclient.discovery import build
 
-from src.main.python.config import *
-from src.main.python.worker import AbstractWorker
+from config import *
+from worker import AbstractWorker
 
 
 class LoadsWorker(AbstractWorker):
