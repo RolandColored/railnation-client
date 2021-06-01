@@ -1,7 +1,10 @@
 import csv
 from time import sleep
 
+from config import TOWN_MAPPING
 from worker import AbstractWorker
+
+REVERSE_TOWN_MAPPING = {v: k for k, v in TOWN_MAPPING.items()}
 
 
 class PrestigeWorker(AbstractWorker):
@@ -41,10 +44,13 @@ class PrestigeWorker(AbstractWorker):
         landmarks = set(landmark['type'] for user_id, prestige in prestiges.items() for landmark in prestige['landmarks'])
 
         with open(self.filename, 'w', newline='') as csvfile:
-            fieldnames = ['member', 'transports', 'invests', 'trainstation', 'other', 'competition', 'medal',
-                          '-cities-'] + list(cities) + ['-landmarks-'] + list(landmarks)
+            fieldnames = ['member', 'transports', 'invests', 'trainstation', 'other', 'competition', 'medal'] + \
+                         list(cities) + list(landmarks)
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
+
+            # city names
+            writer.writerow({city: REVERSE_TOWN_MAPPING[city] for city in cities})
 
             for user_id, prestige in prestiges.items():
                 overview_dict = {
