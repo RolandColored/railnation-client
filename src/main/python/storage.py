@@ -51,11 +51,17 @@ class StorageWorker(AbstractWorker):
 
             values = []
             for i, resource in enumerate(town_details['StoragesInfo']['Storages']):
-                # fill row with historic delivered values for overall delivery performance
+                # fill row with town storage values
                 row = [resource['ResourceId'], resource['Limit'], resource['ConsumptionAmount'], resource['Amount'],
                        last_values[i][3] if len(last_values[i]) > 3 else '']
-                if current_good is not None and resource['ResourceId'] == current_good:
-                    row += [delivered] + last_values[i][5:]
+
+                # new block - remove old values
+                if resource['ResourceId'] != int(last_values[i][0]):
+                    row += [''] * 45
+
+                # fill row with historic delivered values for overall delivery performance
+                elif current_good is not None and resource['ResourceId'] == current_good:
+                    row += [delivered] + last_values[i][5:50]
                 values.append(row)
 
             sheet.values().update(spreadsheetId=SPREADSHEET_ID, range=STORAGES_RANGE,

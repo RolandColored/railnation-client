@@ -28,7 +28,7 @@ class App(QDialog):
         self.api = ServerCaller(f's{server_number}.railnation.de', session_id)
 
     def report_progress(self, i, total):
-        self.progressBar.setValue(int(i / total * 100))
+        self.progressBar.setValue(int(i / float(total) * 100))
 
     def finished_process(self):
         self.report_progress(0, 1)
