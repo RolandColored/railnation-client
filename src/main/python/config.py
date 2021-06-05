@@ -2,7 +2,7 @@ SPREADSHEET_ID = '1PUkEhDxq59BVvPofj8zucO4NtglX27Wz4m2fiChS_5k'
 SHEET_NAME = 'Endspiel Maindaten'
 
 # loads refresh
-FIRST_DATA_ROW = 12
+FIRST_DATA_ROW = 14
 DONE_COLUMN = 'D'
 IDS_COLUMN = 'Y'
 LEVEL_COLUMN = 'G'

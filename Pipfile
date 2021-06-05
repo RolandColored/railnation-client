@@ -8,6 +8,7 @@ google-api-python-client = "*"
 pyqt5 = "*"
 requests = "*"
 fbs = "*"
+unidecode = "*"
 
 [dev-packages]
 

@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5 import uic
-from PyQt5.QtCore import QThread, QObject
+from PyQt5.QtCore import QThread, QObject, Qt
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QFileDialog, QDialog
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
@@ -18,6 +18,7 @@ class App(QDialog):
     def __init__(self, ui, parent=None):
         super().__init__(parent)
         uic.loadUi(ui, self)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
 
         self.btn_prestige.clicked.connect(self.clicked_prestige)
         self.btn_loads.clicked.connect(self.clicked_loads)

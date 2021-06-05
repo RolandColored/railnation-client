@@ -1,6 +1,8 @@
 import csv
 from time import sleep
 
+from unidecode import unidecode
+
 from config import TOWN_MAPPING
 from worker import AbstractWorker
 
@@ -61,7 +63,7 @@ class PrestigeWorker(AbstractWorker):
                     'competition': [row for row in prestige['overview'] if row['type'] == '7'],
                     'medal': [row for row in prestige['overview'] if row['type'] == '8'],
                 }
-                write_dict = {'member': profiles[user_id]['userName']}
+                write_dict = {'member': unidecode(profiles[user_id]['userName'])}
                 for key, value in overview_dict.items():
                     if len(value) > 0:
                         write_dict[key] = value[0]['prestige']
